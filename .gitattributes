@@ -1,0 +1,11 @@
+# Model artefacts are opaque binaries: a textual diff of any of them is noise, and
+# git's newline handling must never touch them.
+*.onnx binary
+*.onnx.data binary
+*.rknn binary
+*.engine binary
+*.tar binary
+*.npz binary
+
+# The demo images are inputs, not something to diff.
+*.png binary

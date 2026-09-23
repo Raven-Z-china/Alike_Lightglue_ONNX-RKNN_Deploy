@@ -1,0 +1,34 @@
+# Environment `rknn` — ONNX -> RKNN conversion and simulator validation.
+#
+#   conda create -n rknn python=3.8 -y && conda activate rknn
+#   pip install torch==2.4.0 torchvision==0.19.0 \
+#       --index-url https://download.pytorch.org/whl/cu121
+#   pip install rknn-toolkit2==2.3.2
+#   pip install omegaconf==2.3.1
+#
+# torch goes in FIRST and from the cu121 index, because rknn-toolkit2 declares
+# `torch<=2.4.0,>=1.10.1` and pip would otherwise satisfy that from plain PyPI
+# with the CPU-only wheel.  The cu121 build covers sm_50 through sm_90, so it
+# runs on anything up to Ampere; nothing in this repository requires the GPU.
+#
+# Everything else rknn-toolkit2 pulls in for itself.  Its pins are the reason
+# this environment cannot be merged with `alike`:
+#
+#   rknn-toolkit2 2.3.2 ->  torch<=2.4.0,>=1.10.1
+#                           numpy<=1.26.4          <- the hard blocker
+#                           onnx>=1.16.1, onnxruntime>=1.10.0
+#                           scipy>=1.5.4, opencv-python>=4.5.5.64
+#                           protobuf<=4.25.4,>=4.21.6, psutil, ruamel.yaml,
+#                           tqdm>=4.64.0, fast-histogram>=0.11
+#
+# Consequence, measured (README "Why two"): torch 2.4 cannot export stage 2 at
+# ANY opset - 13 fails on aten::scaled_dot_product_attention, 14-18 fail with an
+# IndexError inside torch's own aten::transpose symbolic, where the rank of a
+# rank-5 value is inferred as 4.  Stage 1 does export there and is numerically
+# identical, but packs 22 % larger (12.32 vs 10.07 MB).
+
+rknn-toolkit2==2.3.2
+
+# Not a rknn-toolkit2 dependency: two checkpoint-inspecting probes import it at
+# module level, so `--help` needs it.
+omegaconf==2.3.1

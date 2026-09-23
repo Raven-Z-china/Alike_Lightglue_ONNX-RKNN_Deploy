@@ -1,0 +1,46 @@
+# Environment `alike` — everything that builds or scores a graph.
+#
+#   conda create -n alike python=3.10 -y && conda activate alike
+#   pip install torch==2.11.0 torchvision==0.26.0 \
+#       --index-url https://download.pytorch.org/whl/cu128
+#   pip install -r requirements-alike.txt
+#
+# torch must go in first, from the CUDA index: on plain PyPI it resolves to a
+# CPU-only wheel.  The cu128 build covers every current architecture, from Turing
+# onwards - any current consumer GPU will do.
+#
+# Version notes:
+#   * numpy 2.x is fine here.  It is NOT fine in `rknn`, which caps at 1.26.4 -
+#     that cap is the root of the whole two-environment split (see README).
+#   * onnxruntime-gpu is optional.  The accuracy harness runs with
+#     providers=["CPUExecutionProvider"] on purpose, so the CPU wheel scores
+#     identically; the GPU build is not used by anything here.
+#   * onnxscript is what torch's newer export path wants; it arrived as a
+#     transitive dependency and is pinned only so the export is reproducible.
+
+torch==2.11.0
+torchvision==0.26.0
+onnx==1.22.0
+onnxruntime-gpu==1.23.2
+onnxscript==0.7.2
+# Only scripts/convert_to_trt.py needs this.  The CUDA-12 build is the one that
+# matches this environment; plain `pip install tensorrt` resolves to the cu13
+# variant, which has no wheel for this platform and tries to compile its runtime
+# from source.
+tensorrt-cu12==10.13.3.9
+numpy==2.2.6
+scipy==1.15.3
+omegaconf==2.3.1
+opencv-contrib-python-headless==4.10.0.84
+pillow==12.3.0
+h5py==3.16.0
+matplotlib==3.10.9
+PyYAML==6.0.3
+tqdm==4.70.0
+
+# NOT needed: the training framework.  The ALIKE backbone, the DKD detector and
+# the LightGlue matcher are all vendored under `model/`.  Two tools still want a
+# glue-factory checkout, and both are optional — see README "Self-contained":
+#   pruning/finetune.py                 launches `python -m gluefactory.train`
+#   scripts/verify_vendored_matcher.py  compares the port against the original
+# To use either:  export GLUEFACTORY_ROOT=/path/to/glue-factory
