@@ -4,6 +4,11 @@ Keypoint detection and matching on RKNN and TensorRT.
 
 The full pipeline — ALIKE backbone, NMS, top-k, soft-argmax, descriptor sampling, and LightGlue matcher — runs **in-graph**. No operators fall back to CPU in the released configuration.
 
+## Demo
+<img src="sequence_matches.gif" width = "1024" height = "512"  alt="match_image" border="10" />
+
+* This demo was tested on the RTX 5090.
+
 ## Repository layout
 
 | path | contents |
